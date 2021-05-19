@@ -11,7 +11,6 @@ export class AppService {
       const res = await this.cacheManager.get(id);
 
       if (res){
-        console.log(res);
         return res;
       }else{
         const msgErrorr = 'REDIS-KEY NOT FOUND';
