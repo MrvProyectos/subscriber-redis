@@ -1,5 +1,4 @@
-import { Controller, Get, HttpStatus, Param, ParseArrayPipe, ParseIntPipe, Res } from "@nestjs/common";
-//import { AppService } from "./app.service";
+import { Controller, Get, HttpStatus, Param, ParseIntPipe, Res } from "@nestjs/common";
 import { RedisService } from './redis/redis.service';
 
 @Controller()
@@ -11,7 +10,7 @@ export class AppController {
     const dataRedis: any = await this._redisService.getRedis(idKey);
 
     if (dataRedis === null){
-      return res.status(HttpStatus.NOT_FOUND).json("404 - Data Not Found");
+      return res.status(HttpStatus.NOT_FOUND).json(`${res.statusCode} - Data Not Found: Key => ${idKey} `);
     } else {
         return res.status(HttpStatus.OK).json(dataRedis);
     }

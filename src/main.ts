@@ -1,11 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-
-// swagger
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+
+require('dotenv').config();
 
 async function bootstrap(){
   const app = NestFactory.create(AppModule);
+  const port = process.env.PORT;
 
   const options = new DocumentBuilder()
   .setTitle('Get SubScriber - Redis')
@@ -17,7 +18,7 @@ async function bootstrap(){
   const document = SwaggerModule.createDocument(await app, options);
   SwaggerModule.setup('api', await app, document);
 
-  (await app).listen(3003);
+  (await app).listen(port);
 }
 
 bootstrap();
