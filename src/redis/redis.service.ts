@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Res } from '@nestjs/common';
+import { LoggerService } from 'src/logger/logger.service';
 
 const asyncRedis = require("async-redis");
 const redisClient = asyncRedis.createClient();
@@ -9,8 +10,21 @@ redisClient.on("error", function(err){
 
 @Injectable()
 export class RedisService {
+    constructor(private readonly _loggerService: LoggerService){};
+
     async getRedis(idKey: number){
         const dataRedis: string = await redisClient.get(idKey);
-        return JSON.parse(dataRedis);
+
+        if (dataRedis === null){
+            this._loggerService.customError({}, {message: "=> Data Not Found"});
+            throw new HttpException({
+                status: HttpStatus.NOT_FOUND,
+                error: 'Data Redis not found',
+              }, HttpStatus.NOT_FOUND);
+    
+        }else{
+            this._loggerService.customInfo({}, {message: 'OK'});
+            return JSON.parse(dataRedis);
+        }
     };
 };
