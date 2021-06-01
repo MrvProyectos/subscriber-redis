@@ -9,6 +9,7 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
   private logger = new LoggerService();
 
   catch(exception: any, host: ArgumentsHost) {
+
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();

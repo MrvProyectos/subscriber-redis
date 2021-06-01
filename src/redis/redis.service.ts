@@ -1,5 +1,7 @@
-import { HttpException, HttpStatus, Injectable, Res } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { validate } from 'class-validator';
 import { LoggerService } from 'src/logger/logger.service';
+import { ValidationDTO } from './../dto/validation.dto';
 
 const asyncRedis = require("async-redis");
 const redisClient = asyncRedis.createClient();
@@ -15,16 +17,28 @@ export class RedisService {
     async getRedis(idKey: number){
         const dataRedis: string = await redisClient.get(idKey);
 
-        if (dataRedis === null){
-            this._loggerService.customError({}, {message: "=> Data Not Found"});
+        if (dataRedis !== null){
+            // DTO
+            const validationResult: ValidationDTO = JSON.parse(dataRedis);
+            const result = new ValidationDTO(validationResult);
+            const validation = await validate(result);
+
+            if (validation.length === 0){
+                this._loggerService.customInfo({}, {message: 'Data Validated OK.'});
+                return JSON.parse(dataRedis);    
+            }else{
+                this._loggerService.customError({}, {message: "=> the server could not interpret the request given invalid syntax."});
+                throw new HttpException({
+                    status: HttpStatus.BAD_REQUEST,
+                    error: 'the server could not interpret the request given invalid syntax.',
+                }, HttpStatus.BAD_REQUEST);            
+            }
+        }else{
+            this._loggerService.customError({}, {message: "=> Data Redis Not Found"});
             throw new HttpException({
                 status: HttpStatus.NOT_FOUND,
-                error: 'Data Redis not found',
-              }, HttpStatus.NOT_FOUND);
-    
-        }else{
-            this._loggerService.customInfo({}, {message: 'OK'});
-            return JSON.parse(dataRedis);
+                error: 'Data Redis Not Found',
+            }, HttpStatus.NOT_FOUND);
         }
     };
 };
