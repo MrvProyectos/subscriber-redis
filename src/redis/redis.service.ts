@@ -15,7 +15,7 @@ export class RedisService {
     constructor(private readonly _loggerService: LoggerService){};
 
     async getRedis(idKey: number){
-        const dataRedis: string = await redisClient.get(idKey);
+        const dataRedis: any = await redisClient.get(idKey);
 
         if (dataRedis !== null){
             // DTO

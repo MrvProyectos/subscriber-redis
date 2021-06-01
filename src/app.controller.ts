@@ -1,12 +1,10 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Req } from "@nestjs/common";
-import { LoggerService } from "./logger/logger.service";
+import { Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe } from "@nestjs/common";
 import { RedisService } from './redis/redis.service';
 
 @Controller()
 export class AppController {
   constructor(
     private readonly _redisService: RedisService,
-    private readonly _loggerService: LoggerService
     ){}
 
     @Get(':idKey')
