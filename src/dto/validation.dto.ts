@@ -37,5 +37,5 @@ export class ValidationDTO{
     })
     status: string;
 
-    data:any
+    data: any
 }

@@ -1,6 +1,6 @@
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AllExceptionsFilter } from './exception-filters/all-exceptions.filter';
 
@@ -10,6 +10,7 @@ async function bootstrap(){
   const app = await NestFactory.create(AppModule);
   const port = process.env.PORT;
   const logger = new Logger();
+  const { httpAdapter } = app.get(HttpAdapterHost);
   
   const options = new DocumentBuilder()
   .setTitle('Get SubScriber - Redis')
@@ -21,7 +22,8 @@ async function bootstrap(){
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
 
-  app.useGlobalFilters(new AllExceptionsFilter);
+  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
   app.listen(port);
 
   logger.log(`Server Start => ${port}`);
