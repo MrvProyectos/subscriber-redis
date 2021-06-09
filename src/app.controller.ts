@@ -10,26 +10,44 @@ export class AppController {
               private readonly _logger: LoggerService){}
 
   @Get(':idKey')
-  async getRedis(@Param('idKey', ParseIntPipe) idKey: number){
+  async getRedis(@Param('idKey') idKey: string){
     const dataRedis: any = await this._redisService.getRedis(idKey);
 
-    if (dataRedis === null){
-      this._logger.customError({}, {message: "=> Data Redis Not Found."});
-      throw new HttpException({
-        status: HttpStatus.NOT_FOUND,
-        error: 'Data Redis Cache Not Found.',
-      }, HttpStatus.NOT_FOUND);
-    }else{
-      const validation = await validate(dataRedis as ValidationDTO);
-      if (validation.length === 0){
-        this._logger.customInfo({}, { message: 'Data Validated is OK.'})
-        return {status: HttpStatus.OK, statusDescription: dataRedis};
+    try{
+
+      if (!dataRedis){
+        this._logger.info({}, {message: `Data Redis Not Found => ${JSON.stringify(dataRedis)}`});
+        throw new HttpException ({
+          status: HttpStatus.NOT_FOUND,
+        }, HttpStatus.NOT_FOUND);
+
       }else{
-        this._logger.customError({}, {message: "=> Validation Error Data Redis Cache."});
-        throw new HttpException({
+        const validation = await validate(dataRedis as ValidationDTO);
+        if (validation.length === 0){
+          this._logger.info({}, {message: `Data Validated is OK => ${JSON.stringify(validation)}`});
+          return {status: HttpStatus.OK, statusDescription: dataRedis};
+  
+        }else{
+          this._logger.error({}, {message: "=> Validation Error Data Redis Cache."});
+          throw new HttpException({
             status: HttpStatus.BAD_REQUEST,
-            error: 'Validation Error Data Redis Cache.',
-        }, HttpStatus.BAD_REQUEST);
+            errorMessage: 'Validation Error Data Redis Cache.',
+          }, HttpStatus.BAD_REQUEST);
+        }
+      }
+
+    }catch(e){
+      if (!dataRedis){
+        throw new HttpException ({
+          status: HttpStatus.NOT_FOUND,
+          errorMessage: 'Data Redis Cache Not Found.',
+        }, HttpStatus.NOT_FOUND);
+
+      }else{
+        throw new HttpException({
+          status: HttpStatus.CONFLICT,
+          statusMessage: 'Unexpected Server Error.',
+        }, HttpStatus.CONFLICT);  
       }
     }
   }
