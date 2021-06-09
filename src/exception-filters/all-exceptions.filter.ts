@@ -19,17 +19,8 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
     // const error: Record<string, any> = (httpException) ? exception.response.data || 
     // exception.response.message : exception.message || exception;
 
-    const httpException = (exception instanceof HttpException) ? exception.getResponse() : 
-                          (exception.message) ? exception.message : 
-                          exception ? exception.response.data : exception.response.message;
-
-    const error: Record<string, any> = (httpException);
-    // console.log(`httpException => ${JSON.stringify(exception)}`);
-    // console.log(`error => ${JSON.stringify(error)}`);
-
-    // ANTIGUO
-    // const error: Record<string, any> = (exception instanceof HttpException) ? exception.getResponse() : (exception.message) ? exception.message : exception;
-
+    const httpException = (exception instanceof HttpException) ? exception.getResponse() : null;
+    const error: Record<string, any> = (httpException) ? exception.response : exception.message || exception;
     this.logger.error(request.headers, error);
 
     const status = (exception.response) ? exception.response.status || exception.response.statusCode || exception.status
@@ -47,9 +38,6 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
 
     statusDescription = (exception.response) ? error : exception.message;
     url = request.url;
-
-    // console.log(`statusDescription => ${JSON.stringify(exception.response)}`);
-    // console.log(`statusDescription2 => ${JSON.stringify(exception.message)}`);
 
     return response.status(status)
       .json({
